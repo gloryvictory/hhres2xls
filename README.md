@@ -1,5 +1,5 @@
 # hhres2xls
-find resume (*.doc) and make xls 
+find all resume (*.doc) in a Folder and make xls 
 
 1. convert all *.doc to *.txt file
 2. get *.txt file and make csv and Excel file with following structure
