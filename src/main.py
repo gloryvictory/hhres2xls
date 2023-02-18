@@ -22,6 +22,9 @@
 import os
 import win32com.client
 import re
+import csv
+import pandas as pd
+
 from src import cfg
 from src.log import set_logger
 
@@ -90,6 +93,17 @@ def get_file_name_without_extension(path=''):
         return path.split('\\').pop().split('/').pop()
 
 
+def csv_file_out_create():
+    csv_dict = cfg.CSV_DICT
+    file_csv = str(os.path.join(os.getcwd(), cfg.CSV_FILE))  # from cfg.file
+    # Если выходной CSV файл существует - удаляем его
+    if os.path.isfile(file_csv):
+        os.remove(file_csv)
+    with open(file_csv, 'w', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
+        csv_file_open = csv.DictWriter(csv_file, csv_dict.keys(), delimiter=cfg.CSV_DELIMITER)
+        csv_file_open.writeheader()
+
+
 def txt2xls(f):
     folder_out = cfg.FOLDER_IN
     filename = f
@@ -118,23 +132,26 @@ def txt2xls(f):
 
     with open(filename, 'r', encoding='utf-16-le') as file:
         lines = file.readlines()
+        cnt_line = 0
         for line in lines:
-            # print(line)
-            # if valid_email(line):
+            cnt_line += 1
+
+            # ищем в первых 10 строках
             match = re.search(str_regex_email, line)
-            if match:
+            if match and cnt_line < 10:
                 str_email = match.group(0)
 
+
             match1 = re.search(str_regex_tel, line)
-            if match1:
+            if match1 and cnt_line < 10:
                 str_tel = match1.group(0)
 
             match2 = re.search(str_regex_city, line)
-            if match2:
+            if match2 and cnt_line < 10:
                 str_city = line.replace("Проживает:", "").strip()
 
             match3 = re.search(str_regex_gender_m, line)
-            if match3:
+            if match3 and cnt_line < 10:
                 str_gender = 'Мужчина'
                 str_tmp = line.replace("Мужчина,", "")
                 arr_tmp = str_tmp.split()
@@ -142,7 +159,7 @@ def txt2xls(f):
                     str_age = arr_tmp[0]
 
             match4 = re.search(str_regex_gender_f, line)
-            if match4:
+            if match4 and cnt_line < 10:
                 str_gender = 'Женщина'
                 str_tmp = line.replace("Женщина,", "")
                 arr_tmp = str_tmp.split()
@@ -170,16 +187,43 @@ def txt2xls(f):
     print(f"Found Age: {str_age}")
     print(f"Found Gr: {str_gr}")
     print(f"Found Zan: {str_zan}")
+    csv_dict = cfg.CSV_DICT
+    file_csv = cfg.CSV_FILE
+    for key in csv_dict:
+        csv_dict[key] = ''
+
+    csv_dict['FIO'] = str_fio
+    csv_dict['EMAIL'] = str_email
+    csv_dict['TEL'] = str_tel
+    csv_dict['CITY'] = str_city
+    csv_dict['GENDER'] = str_gender
+    csv_dict['AGE'] = str_age
+    csv_dict['GR'] = str_gr
+    csv_dict['ZAN'] = str_zan
+    csv_dict['COMM1'] = 'test'
+    with open(file_csv, 'a', newline='\n', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
+        csv_file_open = csv.DictWriter(csv_file, csv_dict.keys(), delimiter=cfg.CSV_DELIMITER)
+        try:
+            # print(csv_dict['FULLNAME'])
+            csv_file_open.writerow(csv_dict)
+        except Exception as e:
+            print("Exception occurred " + str(e))  # , exc_info=True
+        csv_file.close()
 
 
 def folder_scan():
-    # files_list_doc = get_list_files_by_ext(cfg.FOLDER_IN, '.doc')
-    # for f in files_list_doc:
-    #     doc2txt(f)
+    files_list_doc = get_list_files_by_ext(cfg.FOLDER_IN, '.doc')
+    for f in files_list_doc:
+        doc2txt(f)
+
+    csv_file_out_create()
 
     files_list_txt = get_list_files_by_ext(cfg.FOLDER_IN, '.txt')
     for f in files_list_txt:
         txt2xls(f)
+
+    read_file = pd.read_csv(cfg.CSV_FILE)
+    read_file.to_excel(cfg.CSV_FILE + '.xlsx', index=None, header=True)
 
 
 if __name__ == "__main__":

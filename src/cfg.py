@@ -9,7 +9,8 @@ FILE_LOG_FORMAT = '%(asctime)s %(levelname)s %(message)s'
 
 FOLDER_IN  = 'C:\\Glory\\Projects\\Python\\hhres2xls\\src\\data'
 
-CSV_DELIMITER = ';'
+CSV_DELIMITER = ','
+
 CSV_FILE = 'res_out.csv'
 CSV_DICT = {'FIO': '',
                 'EMAIL': '',
@@ -17,6 +18,7 @@ CSV_DICT = {'FIO': '',
                 'CITY': '',
                 'GENDER': '',
                 'AGE': '',
-                'COMM1': '',
-                'COMM2': ''
+                'GR': '',
+                'ZAN': '',
+                'COMM1': ''
                 }
