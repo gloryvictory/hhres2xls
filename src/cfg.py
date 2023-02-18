@@ -18,7 +18,8 @@ CSV_DICT = {'FIO': '',
                 'CITY': '',
                 'GENDER': '',
                 'AGE': '',
+                'OBR': '',
                 'GR': '',
                 'ZAN': '',
-                'COMM1': ''
+                'NAVIK': ''
                 }

@@ -48,8 +48,8 @@ def get_list_files_by_ext(folder_start: str = '', ext: str = 'txt'):
 
 def doc2txt(file_path=''):
     # folder_out = cfg.FOLDER_IN
-    log = set_logger('!find_files.log')
-
+    log = set_logger('find_files.log')
+    print(file_path)
     if len(str(cfg.FOLDER_IN)) < 3:
         return
     app = win32com.client.Dispatch('Word.Application')
@@ -105,20 +105,18 @@ def csv_file_out_create():
 
 
 def txt2xls(f):
-    folder_out = cfg.FOLDER_IN
+    # folder_out = cfg.FOLDER_IN
     filename = f
     str_regex_email = r'[\w.+-]+@[\w-]+\.[\w.-]+'
     str_regex_tel = r'[\+\(]?[1-9][0-9 .\-\(\)]{8,}[0-9]'
-
-    # r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$'
-    # r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$"
-    # regex = re.compile(r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])")
 
     str_regex_city = r'^Проживает:'
     str_regex_gender_m = r'^Мужчина,'
     str_regex_gender_f = r'^Женщина,'
     str_regex_gr = r'^Гражданство:'
     str_regex_zan = r'^Занятость:'
+    str_regex_obr = r'^Образование'
+    str_regex_nav = r'^Навыки'
 
     str_fio = get_file_name_without_extension(filename)
     str_tel = ''
@@ -128,11 +126,15 @@ def txt2xls(f):
     str_age = ''
     str_gr = ''
     str_zan = ''
-
+    str_obr = ''
+    str_nav = ''
 
     with open(filename, 'r', encoding='utf-16-le') as file:
         lines = file.readlines()
         cnt_line = 0
+        is_obr = False
+        is_nav = False
+
         for line in lines:
             cnt_line += 1
 
@@ -140,7 +142,6 @@ def txt2xls(f):
             match = re.search(str_regex_email, line)
             if match and cnt_line < 10:
                 str_email = match.group(0)
-
 
             match1 = re.search(str_regex_tel, line)
             if match1 and cnt_line < 10:
@@ -177,16 +178,33 @@ def txt2xls(f):
             if match6:
                 str_zan = line.replace("Занятость:", "").strip()
 
+            if is_obr:
+                str_obr = line.strip()
+                is_obr = False
 
+            if is_nav:
+                str_nav = line.strip()
+                is_nav = False
+
+            match7 = re.search(str_regex_obr, line)
+            if match7:
+                is_obr = True
+
+            match8 = re.search(str_regex_nav, line)
+            if match8:
+                is_nav = True
 
     print(f"Found FIO: {str_fio}")
-    print(f"Found EMAIL: {str_email}")
-    print(f"Found TEL: {str_tel}")
-    print(f"Found City: {str_city}")
-    print(f"Found Gender: {str_gender}")
-    print(f"Found Age: {str_age}")
-    print(f"Found Gr: {str_gr}")
-    print(f"Found Zan: {str_zan}")
+    # print(f"Found EMAIL: {str_email}")
+    # print(f"Found TEL: {str_tel}")
+    # print(f"Found City: {str_city}")
+    # print(f"Found Gender: {str_gender}")
+    # print(f"Found Age: {str_age}")
+    # print(f"Found Gr: {str_gr}")
+    # print(f"Found Zan: {str_zan}")
+    # print(f"Found OBR: {str_obr}")
+    # print(f"Found NAV: {str_nav}")
+
     csv_dict = cfg.CSV_DICT
     file_csv = cfg.CSV_FILE
     for key in csv_dict:
@@ -200,7 +218,9 @@ def txt2xls(f):
     csv_dict['AGE'] = str_age
     csv_dict['GR'] = str_gr
     csv_dict['ZAN'] = str_zan
-    csv_dict['COMM1'] = 'test'
+    csv_dict['OBR'] = str_obr
+    csv_dict['NAVIK'] = str_nav
+
     with open(file_csv, 'a', newline='\n', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
         csv_file_open = csv.DictWriter(csv_file, csv_dict.keys(), delimiter=cfg.CSV_DELIMITER)
         try:
@@ -228,8 +248,3 @@ def folder_scan():
 
 if __name__ == "__main__":
     folder_scan()
-
-#
-# regex = re.compile(r'^%s(\.(exe|cmd|bat|bin))?$' % regex, re.IGNORECASE)
-#        if regex.search(found) is not None:
-#            return True
