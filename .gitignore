@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 /src/data/
 /src/res_out.csv
+
+.idea/
+/src/res_out.csv.xlsx
