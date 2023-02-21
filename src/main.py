@@ -117,6 +117,7 @@ def txt2xls(f):
     str_regex_zan = r'^Занятость:'
     str_regex_obr = r'^Образование'
     str_regex_nav = r'^Навыки'
+    str_regex_prority = r'- предпочитаемый способ связи'
 
     str_fio = get_file_name_without_extension(filename)
     str_tel = ''
@@ -128,6 +129,7 @@ def txt2xls(f):
     str_zan = ''
     str_obr = ''
     str_nav = ''
+    str_priority = ''
 
     with open(filename, 'r', encoding='utf-16-le') as file:
         lines = file.readlines()
@@ -194,6 +196,11 @@ def txt2xls(f):
             if match8:
                 is_nav = True
 
+            match9 = re.search(str_regex_prority, line)
+            if match9 and cnt_line < 10:
+                str_priority = line.replace("- предпочитаемый способ связи", "").strip()
+
+
     print(f"Found FIO: {str_fio}")
     # print(f"Found EMAIL: {str_email}")
     # print(f"Found TEL: {str_tel}")
@@ -213,6 +220,7 @@ def txt2xls(f):
     csv_dict['FIO'] = str_fio
     csv_dict['EMAIL'] = str_email
     csv_dict['TEL'] = str_tel
+    csv_dict['PRIORITY'] = str_priority
     csv_dict['CITY'] = str_city
     csv_dict['GENDER'] = str_gender
     csv_dict['AGE'] = str_age

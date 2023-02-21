@@ -15,6 +15,7 @@ CSV_FILE = 'res_out.csv'
 CSV_DICT = {'FIO': '',
                 'EMAIL': '',
                 'TEL': '',
+                'PRIORITY': '',
                 'CITY': '',
                 'GENDER': '',
                 'AGE': '',
